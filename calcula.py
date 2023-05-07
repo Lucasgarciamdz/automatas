@@ -1,18 +1,31 @@
+# Analizador sintactico predictivo para operaciones aritméticas + - % y ()
+
+# Gramatica
+
+# E-> E + E | E - E| E % E |(E)|i
+
+# E → T E'
+# E' → + T E' | - T E' | ε
+# T → F T'
+# T' → % F T' | ε
+# F → ( E ) | i
+
+
 def obtener_col(simbolo_entrada):
     # Returns the column index for the given input symbol
-    if simbolo_entrada == 'i':
+    if simbolo_entrada == "i":
         return 0
-    elif simbolo_entrada == '+':
+    elif simbolo_entrada == "+":
         return 1
-    elif simbolo_entrada == '-':
+    elif simbolo_entrada == "-":
         return 2
-    elif simbolo_entrada == '%':
+    elif simbolo_entrada == "%":
         return 3
-    elif simbolo_entrada == '(':
+    elif simbolo_entrada == "(":
         return 4
-    elif simbolo_entrada == ')':
+    elif simbolo_entrada == ")":
         return 5
-    elif simbolo_entrada == '$':
+    elif simbolo_entrada == "$":
         return 6
     else:
         return 7
@@ -20,15 +33,15 @@ def obtener_col(simbolo_entrada):
 
 def obtener_fila(no_terminal):
     # Returns the row index for the given non-terminal
-    if no_terminal == 'E':
+    if no_terminal == "E":
         return 0
-    elif no_terminal == 'E\'':
+    elif no_terminal == "E'":
         return 1
-    elif no_terminal == 'T':
+    elif no_terminal == "T":
         return 2
-    elif no_terminal == 'T\'':
+    elif no_terminal == "T'":
         return 3
-    elif no_terminal == 'F':
+    elif no_terminal == "F":
         return 4
     else:
         return 5
@@ -57,11 +70,13 @@ class Pila:
         return self.items
 
 
-tabla = [["E->TE\'", "", "", "", "E->TE\'", "", ""],
-         ["", "E\'->+TE'", "E'->-TE\'", "", "", "E\'->e", "E\'->e"],
-         ["T->FT\'", "", "", "", "T->FT'", "", ""],
-         ["", "T\'->e", "T\'->e", "T\'->%FT\'", "", "T\'->e", "T\'->e"],
-         ["F->i", "", "", "", "F->(E)", "", ""]]
+tabla = [
+    ["E->TE'", "", "", "", "E->TE'", "", ""],
+    ["", "E'->+TE'", "E'->-TE'", "", "", "E'->e", "E'->e"],
+    ["T->FT'", "", "", "", "T->FT'", "", ""],
+    ["", "T'->e", "T'->e", "T'->%FT'", "", "T'->e", "T'->e"],
+    ["F->i", "", "", "", "F->(E)", "", ""],
+]
 
 
 def check(entrada):
@@ -86,13 +101,13 @@ def check(entrada):
             if salida != "":
                 pil.extraer()
                 posicion = salida.find(">")
-                produccion = salida[posicion + 1: len(salida)]
+                produccion = salida[posicion + 1 : len(salida)]
                 produccion_pila = []
 
                 for simbolo in produccion:
                     if simbolo != "'":
                         posicion_2 = produccion.find(simbolo)
-                        if produccion[posicion_2 + 1: posicion_2 + 2] == "'":
+                        if produccion[posicion_2 + 1 : posicion_2 + 2] == "'":
                             produccion_pila.append(simbolo + "'")
                         else:
                             produccion_pila.append(simbolo)
@@ -109,10 +124,14 @@ def check(entrada):
     return False
 
 
-def calculate_and_check():
-    expression = "3 + 3 + ( 5 % 2 ) - 2"
+def calculate_and_check(expression="3 + 3 + ( 5 % 2 ) - 3"):
     if check(expression.split()):
-        return f"La expresión es correcta, {eval(expression)}"
+        print(f"La expresión es correcta, {eval(expression)}")
+        return True
+    print(f"La expresión no es correcta")
+    return False
 
 
-print(calculate_and_check())
+if __name__ == "__main__":
+    calculate_and_check()
+
