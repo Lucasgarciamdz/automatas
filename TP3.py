@@ -1,134 +1,139 @@
-# Analizador sintactico predictivo para operaciones aritméticas + * y ()
-# Ejemplo de entrada id*id+id
-# Gramatica
-# E → T E'
-# E' → + T E'| ε
-# T → F T'
-# T' → * F T'| ε
-# F → ( E ) | i
+""" Analizador sintactico predictivo para operaciones aritméticas + - % y ()
 
-# E-> E + E | E - E| E % E |(E)|i
+Gramatica
 
-# E → T E'
-# E' → + T E' | - T E' | ε
-# T → F T'
-# T' → % F T' | ε
-# F → ( E ) | i
+E-> E + E | E - E| E % E |(E)|i
 
-# import igraph
-
+E → T E'
+E' → + T E' | - T E' | ε
+T → F T'
+T' → % F T' | ε
+F → ( E ) | i
+"""
 import pandas as pd
 
 
 def obtener_col(simbolo_entrada):
-    # Returns the column index for the given input symbol
-    if simbolo_entrada == 'i':
-        return 0
-    elif simbolo_entrada == '+':
-        return 1
-    elif simbolo_entrada == '-':
-        return 2
-    elif simbolo_entrada == '%':
-        return 3
-    elif simbolo_entrada == '(':
-        return 4
-    elif simbolo_entrada == ')':
-        return 5
-    elif simbolo_entrada == '$':
-        return 6
-    else:
-        return 7
+    columns = {"i": 0, "+": 1, "-": 2, "%": 3, "(": 4, ")": 5, "$": 6}
+    return columns.get(simbolo_entrada, 7)
 
 
 def obtener_fila(no_terminal):
-    # Returns the row index for the given non-terminal
-    if no_terminal == 'E':
-        return 0
-    elif no_terminal == 'E\'':
-        return 1
-    elif no_terminal == 'T':
-        return 2
-    elif no_terminal == 'T\'':
-        return 3
-    elif no_terminal == 'F':
-        return 4
-    else:
-        return 5
+    rows = {"E": 0, "E'": 1, "T": 2, "T'": 3, "F": 4}
+    return rows.get(no_terminal, 5)
 
 
 class Pila:
     def __init__(self):
         self.items = []
 
-    def estaVacia(self):  # verificar si la pila está vacía
+    def estaVacia(self):
         return self.items == []
 
-    def insertar(self, item):  # inserta elemento en la pila (cima)
+    def insertar(self, item):
         self.items.append(item)
 
-    def extraer(self):  # extrae elemento de la pila (cima)
+    def extraer(self):
         return self.items.pop()
 
-    def inspeccionar(self):  # devuelve el elemento de la cima de la pila
+    def inspeccionar(self):
         return self.items[-1]
 
-    def tamano(self):  # devuelve el tamaño de la pila
+    def tamano(self):
         return len(self.items)
 
-    def contenido(self):  # devuelve el tamaño de la pila
+    def contenido(self):
         return self.items
 
 
-tabla = [["E->TE\'", "", "", "", "E->TE\'", "", ""],
-         ["", "E\'->+TE'", "E'->-TE\'", "", "", "E\'->e", "E\'->e"],
-         ["T->FT\'", "", "", "", "T->FT'", "", ""],
-         ["", "T\'->e", "T\'->e", "T\'->%FT\'", "", "T\'->e", "T\'->e"],
-         ["F->i", "", "", "", "F->(E)", "", ""]]
+tabla = [
+    ["E->TE'", "", "", "", "E->TE'", "", ""],
+    ["", "E'->+TE'", "E'->-TE'", "", "", "E'->e", "E'->e"],
+    ["T->FT'", "", "", "", "T->FT'", "", ""],
+    ["", "T'->e", "T'->e", "T'->%FT'", "", "T'->e", "T'->e"],
+    ["F->i", "", "", "", "F->(E)", "", ""],
+]
 
-p = Pila()
-p.insertar("$")
-p.insertar("E")
 
-entrada = ['i', '+', 'i', '+', '(', 'i', '%', 'i', ')', '$']
-entrada_2 = ['i', '+', 'i', '+', '(', 'i', '%', 'i', ')', '$']
+# def dibujar_arbol(pila_arbol, nivel=0, pila_arbol_original=None, last=True):
+#     if not pila_arbol.estaVacia():
+#         node = pila_arbol.inspeccionar()
+#         pila_arbol.extraer()
 
-salida = ""
+#         branch = "└── " if last else "├── "
+#         print("".join([" " if i % 2 == 0 else "|" for i in range(nivel - 2)]) + branch + node)
 
-df = pd.DataFrame(columns=["Pila", "Entrada", "Salida"])
-df.loc[len(df)] = [p.contenido(), entrada_2, salida]
+#         dibujar_arbol(pila_arbol, nivel + 2, pila_arbol_original, last=True)
+#         dibujar_arbol(pila_arbol, nivel + 2, pila_arbol_original, last=False)
 
-for simbolo_entrada in entrada:
-    cima_pila = p.inspeccionar()
-    while cima_pila != simbolo_entrada:
-        col = obtener_col(simbolo_entrada)
-        fil = obtener_fila(cima_pila)
-        salida = tabla[fil][col]
+#     return pila_arbol_original
 
-        if salida != "":
-            p.extraer()
-            posicion = salida.find(">")
-            produccion = salida[posicion + 1: len(salida)]
-            produccion_pila = []
 
-            for simbolo in produccion:
-                if simbolo != "'":
-                    posicion_2 = produccion.find(simbolo)
-                    if produccion[posicion_2 + 1: posicion_2 + 2] == "'":
-                        produccion_pila.append(simbolo + "'")
-                    else:
-                        produccion_pila.append(simbolo)
+def check(entrada):
+    tabla_datos = []
+    df = pd.DataFrame(columns=["Pila", "Entrada", "Salida"])
+
+    entrada = entrada.split(" ")
+    entrada = [item for item in entrada if item != ""]
+
+    p = Pila()
+    p.insertar("$")
+    p.insertar("E")
+
+    for item in entrada:
+        try:
+            position = entrada.index(item)
+            item = float(item)
+            entrada[position] = "i"
+        except ValueError:
+            continue
+
+    entrada.append("$")
+    salida = ""
+    count = -1
+
+    tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada[count:], "Salida": salida})
+
+    for simbolo_entrada in entrada:
+        count += 1
+        while p.inspeccionar() != simbolo_entrada:
+            col = obtener_col(simbolo_entrada)
+            fil = obtener_fila(p.inspeccionar())
+            try:
+                salida = tabla[fil][col]
+            except IndexError:
+                return False
+
+            if salida != "":
+                p.extraer()
+                posicion = salida.find(">")
+                produccion = salida[posicion + 1: len(salida)]
+                produccion_pila = [simbolo + "'" if produccion[i + 1: i + 2] == "'" else simbolo for i, simbolo in enumerate(produccion) if simbolo != "'"]
+
             for simbolo in reversed(produccion_pila):
                 if simbolo != "e":
                     p.insertar(simbolo)
 
-        df.loc[len(df)] = [p.contenido(), entrada_2, salida]
-        cima_pila = p.inspeccionar()
+            tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada[count:], "Salida": salida})
 
-    if simbolo_entrada == "$" and p.inspeccionar() == "$":
-        print("Arbol sintáctico construido!")
-    else:
-        p.extraer()
-        entrada_2.pop(0)
-        df.loc[len(df)] = [p.contenido(), entrada_2, ""]
+        if simbolo_entrada == "$" and p.inspeccionar() == "$":
+            df = pd.DataFrame(tabla_datos, columns=["Pila", "Entrada", "Salida"])
+            print("------------ Tabla de análisis sintáctico ------------")
+            print(df)
+            return True
+        else:
+            p.extraer()
+            tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada[count:], "Salida": salida})
+    return False
 
-print(df)
+
+def calculate_and_check(expression="3 + 3 + ( 5 % 2 ) - 3"):
+    if check(expression):
+        print(f"La expresión es correcta, {eval(expression)}")
+        return True
+    print("La expresión no es correcta")
+    return False
+
+
+if __name__ == "__main__":
+    calculate_and_check()
