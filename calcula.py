@@ -1,72 +1,48 @@
-# Analizador sintactico predictivo para operaciones aritméticas + - % y ()
+""" Analizador sintactico predictivo para operaciones aritméticas + - % y ()
 
-# Gramatica
+Gramatica
 
-# E-> E + E | E - E| E % E |(E)|i
+E-> E + E | E - E| E % E |(E)|i
 
-# E → T E'
-# E' → + T E' | - T E' | ε
-# T → F T'
-# T' → % F T' | ε
-# F → ( E ) | i
+E → T E'
+E' → + T E' | - T E' | ε
+T → F T'
+T' → % F T' | ε
+F → ( E ) | i
+"""
+import pandas as pd
 
 
 def obtener_col(simbolo_entrada):
-    # Returns the column index for the given input symbol
-    if simbolo_entrada == "i":
-        return 0
-    elif simbolo_entrada == "+":
-        return 1
-    elif simbolo_entrada == "-":
-        return 2
-    elif simbolo_entrada == "%":
-        return 3
-    elif simbolo_entrada == "(":
-        return 4
-    elif simbolo_entrada == ")":
-        return 5
-    elif simbolo_entrada == "$":
-        return 6
-    else:
-        return 7
+    columns = {"i": 0, "+": 1, "-": 2, "%": 3, "(": 4, ")": 5, "$": 6}
+    return columns.get(simbolo_entrada, 7)
 
 
 def obtener_fila(no_terminal):
-    # Returns the row index for the given non-terminal
-    if no_terminal == "E":
-        return 0
-    elif no_terminal == "E'":
-        return 1
-    elif no_terminal == "T":
-        return 2
-    elif no_terminal == "T'":
-        return 3
-    elif no_terminal == "F":
-        return 4
-    else:
-        return 5
+    rows = {"E": 0, "E'": 1, "T": 2, "T'": 3, "F": 4}
+    return rows.get(no_terminal, 5)
 
 
 class Pila:
     def __init__(self):
         self.items = []
 
-    def estaVacia(self):  # verificar si la pila está vacía
+    def estaVacia(self):
         return self.items == []
 
-    def insertar(self, item):  # inserta elemento en la pila (cima)
+    def insertar(self, item):
         self.items.append(item)
 
-    def extraer(self):  # extrae elemento de la pila (cima)
+    def extraer(self):
         return self.items.pop()
 
-    def inspeccionar(self):  # devuelve el elemento de la cima de la pila
+    def inspeccionar(self):
         return self.items[-1]
 
-    def tamano(self):  # devuelve el tamaño de la pila
+    def tamano(self):
         return len(self.items)
 
-    def contenido(self):  # devuelve el tamaño de la pila
+    def contenido(self):
         return self.items
 
 
@@ -80,9 +56,16 @@ tabla = [
 
 
 def check(entrada):
-    pil = Pila()
-    pil.insertar("$")
-    pil.insertar("E")
+
+    df = pd.DataFrame(columns=["Pila", "Entrada", "Salida"])
+
+    entrada = entrada.split(" ")
+    entrada = [item for item in entrada if item != ""]
+
+    p = Pila()
+    p.insertar("$")
+    p.insertar("E")
+
     for item in entrada:
         try:
             position = entrada.index(item)
@@ -90,48 +73,59 @@ def check(entrada):
             entrada[position] = "i"
         except ValueError:
             continue
+
     entrada.append("$")
+    salida = ""
+    count = -1
+
+    df = pd.concat([df, pd.DataFrame.from_records([{"Pila": str(p.contenido()),
+                                                    "Entrada": entrada,
+                                                    "Salida": salida}])], ignore_index=True)
+
     for simbolo_entrada in entrada:
-        cima_pila = pil.inspeccionar()
-        while cima_pila != simbolo_entrada:
+        count += 1
+        while p.inspeccionar() != simbolo_entrada:
             col = obtener_col(simbolo_entrada)
-            fil = obtener_fila(cima_pila)
-            salida = tabla[fil][col]
+            fil = obtener_fila(p.inspeccionar())
+            try:
+                salida = tabla[fil][col]
+            except IndexError:
+                return False
 
             if salida != "":
-                pil.extraer()
+                p.extraer()
                 posicion = salida.find(">")
-                produccion = salida[posicion + 1 : len(salida)]
-                produccion_pila = []
+                produccion = salida[posicion + 1: len(salida)]
+                produccion_pila = [simbolo + "'" if produccion[i + 1 : i + 2] == "'" else simbolo for i, simbolo in enumerate(produccion) if simbolo != "'"]
 
-                for simbolo in produccion:
-                    if simbolo != "'":
-                        posicion_2 = produccion.find(simbolo)
-                        if produccion[posicion_2 + 1 : posicion_2 + 2] == "'":
-                            produccion_pila.append(simbolo + "'")
-                        else:
-                            produccion_pila.append(simbolo)
-                for simbolo in reversed(produccion_pila):
-                    if simbolo != "e":
-                        pil.insertar(simbolo)
+            for simbolo in reversed(produccion_pila):
+                if simbolo != "e":
+                    p.insertar(simbolo)
 
-            cima_pila = pil.inspeccionar()
+            df = pd.concat([df, pd.DataFrame.from_records([{"Pila": str(p.contenido()),
+                                                            "Entrada": entrada[count:],
+                                                            "Salida": salida}])], ignore_index=True)
 
-        if simbolo_entrada == "$" and pil.inspeccionar() == "$":
+        if simbolo_entrada == "$" and p.inspeccionar() == "$":
+            print("------------ Tabla de análisis sintáctico ------------")
+            print(df)
             return True
         else:
-            pil.extraer()
+            p.extraer()
+            df = pd.concat([df, pd.DataFrame.from_records([{"Pila": str(p.contenido()),
+                                                            "Entrada": entrada[count:],
+                                                            "Salida": salida}])], ignore_index=True)
+
     return False
 
 
 def calculate_and_check(expression="3 + 3 + ( 5 % 2 ) - 3"):
-    if check(expression.split()):
+    if check(expression):
         print(f"La expresión es correcta, {eval(expression)}")
         return True
-    print(f"La expresión no es correcta")
+    print("La expresión no es correcta")
     return False
 
 
 if __name__ == "__main__":
     calculate_and_check()
-

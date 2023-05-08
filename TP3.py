@@ -19,6 +19,7 @@
 
 import pandas as pd
 
+
 def obtener_col(simbolo_entrada):
     # Returns the column index for the given input symbol
     if simbolo_entrada == 'i':
