@@ -11,7 +11,7 @@ T' → % F T' | ε
 F → ( E ) | i
 """
 import pandas as pd
-
+import time
 
 def obtener_col(simbolo_entrada):
     columns = {"i": 0, "+": 1, "-": 2, "%": 3, "(": 4, ")": 5, "$": 6}
@@ -128,8 +128,10 @@ def check(entrada):
 
 
 def calculate_and_check(expression="3 + 3 + ( 5 % 2 ) - 3"):
+    print(f"Calculando: {expression} ...")
+    time.sleep(1)
     if check(expression):
-        print(f"La expresión es correcta, {eval(expression)}")
+        print(f"\nLa expresión es correcta, {eval(expression)}")
         return True
     print("La expresión no es correcta")
     return False
