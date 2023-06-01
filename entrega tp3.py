@@ -15,6 +15,7 @@ Hola karki & company :)
 import pandas as pd
 import time
 
+
 def obtener_col(simbolo_entrada):
     columns = {"i": 0, "+": 1, "-": 2, "%": 3, "(": 4, ")": 5, "$": 6}
     return columns.get(simbolo_entrada, 7)
@@ -93,8 +94,8 @@ def check(entrada):
     entrada.append("$")
     salida = ""
     count = -1
-
-    tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada[count:], "Salida": salida})
+    produccion_pila = []
+    tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada, "Salida": "E->TE'"})
 
     for simbolo_entrada in entrada:
         count += 1
@@ -125,7 +126,6 @@ def check(entrada):
             return True
         else:
             p.extraer()
-            tabla_datos.append({"Pila": str(p.contenido()), "Entrada": entrada[count:], "Salida": salida})
     return False
 
 
