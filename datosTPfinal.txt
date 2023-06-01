@@ -1,0 +1,9 @@
+1. Encontrar todos los usuarios
+2. El output es por consola pero hacer algo aparte suma puntos para el resultado final
+3. El final es una presentaciòn del codigo del TP5 y es individual
+4. SI o SI usar modulo "re" para expresiones regulares
+5. Para poder buscar usuarios es buena idea presentar una lista ordenada con numeros o letras
+6. Cantidad de APs de la facultad: 19-20
+7. En el caso de que al hacer un estudio, si un registro llega a estar mal, no se debe tener en cuenta y hay que guardarlo en un reporte de error.
+8. Expresiones regulares: fechas, numeros enteros para bytes y decimales, IPs, MACAddress, etc.
+9. Tareas: en un momento determinado (rango de fechas, fecha y cantidad de tiempo), cuantos usuarios estuvieron conectados a un determinado AP

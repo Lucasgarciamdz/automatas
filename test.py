@@ -1,6 +1,6 @@
 import unittest
 from parameterized import parameterized
-from tp3 import check
+from TP3 import check
 
 
 class test_calcula(unittest.TestCase):

@@ -77,8 +77,7 @@ class Ejercicio_2c():
         self.transitions_blank = ["a", "b", ""]
         self.initial_state = "q0"
         self.acceptance_state = "q4"
-        self.lambdas:
-        {
+        self.lambdas = {
             ("q0", "a"): ("q4", "a", "R"),
             ("q0", "b"): ("q1", "b", "R"),
             ("q1", "a"): ("q4", "a", "R"),
@@ -88,32 +87,28 @@ class Ejercicio_2c():
             ("q3", "a"): ("q4", "a", "R"),
             ("q3", "b"): ("q2", "b", "R")
         }
-        self.lambdas:
-        [
-        ["q4", "q1"],
-        ["q4", "q2"],
-        ["q3", "q2"],
-        ["q4", "q2"],
+        self.lambdas_states =[
+            ["q4", "q1"],
+            ["q4", "q2"],
+            ["q3", "q2"],
+            ["q4", "q2"],
         ]
-    
-    def obtener_fil(estado):
+
+    def obtener_fil(self, estado):
         columns = {"q0": 0, "q1": 1, "q2": 2, "q3": 3, "q4": 4}
         return columns.get(estado)
 
-    def obtener_col(char):
+    def obtener_col(self, char):
         rows = {"a": 0, "b": 1, "": 2}
         return rows.get(char)
 
     def transactions(self):
-        
+
         self.actual_state = self.initial_state
-        for col, char in self.string:
+        for char in self.string:
             if char in self.transitions_blank:
-                self.actual_state = self.lambdas[self.obtener_fil(char)][self.obtener_col(self.actual_state)]
+                self.actual_state = self.lambdas[self.transitions_blank.index(char)][self.obtener_col(self.actual_state)]
             else:
                 print(f"Invalid character: {char}")
             if self.actual_state == self.acceptance_state:
                 print("Accepted")
-             
-
-    
