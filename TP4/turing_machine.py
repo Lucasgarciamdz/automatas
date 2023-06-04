@@ -231,7 +231,7 @@ class Ejercicio_2c():
 
 
 if __name__ == "__main__":
-    ejercicio_2c = Ejercicio_2c("ab")
+    ejercicio_2c = Ejercicio_2c("bbaaa")
     ejercicio_2c.transactions()
     # ejercicio_2a = Ejercicio_2a("yx")
     # ejercicio_2a.transactions()
