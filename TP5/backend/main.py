@@ -14,19 +14,29 @@ Tareas:
 
 - Ya estan todas las REGEX (chequear que esten bien)
 - La logica y manejo del csv ya estaria (refactorizable igual)
-- Hice testing para las REGEX
+- Testing para las REGEX
 
 """
 
 import re
 import pandas as pd
+import numpy as np
+import tabulate
 
 
 # Imprime la totalidad de los APs y pide que le pasemos uno junto con la fecha de inicio y fin de sesion
 def aps():
-    print("Lista APs")
-    print("--------------")
-    print(ap_mac_list)
+    
+    # Crear una lista de listas para representar los datos en forma de tabla
+    tabla_data = [[f'AP{index}', ap] for index, ap in enumerate(ap_mac_list)]
+   
+    # Obtener las etiquetas de las columnas
+    headers = ['ID', 'MACAddress', 'Descripcion']
+
+    # Utilizar tabulate para mostrar los datos
+    table = tabulate.tabulate(tabla_data, headers, tablefmt='fancy_grid')
+    print(table)
+
     ap = input("Ingrese un AP: ")
     date_start = input("Ingrese fecha de inicio: ")
     date_end = input("Ingrese fecha de fin: ")
@@ -34,15 +44,26 @@ def aps():
 
 # Devulve los usuarios conectados dado un cierto AP, fecha de inicio de sesion y fecha de fin de sesion
 def obtain():
-    # ap, date_start, date_end = aps()
-    ap = "04-18-D6-22-38-E1:HCDD"
-    date_start = "2019-02-07"
-    date_end = "2020-02-14"
+    
+    ap, date_start, date_end = aps()
+    # ap = "04-18-D6-22-38-E1:HCDD"
+    # date_start = "2019-02-07"
+    # date_end = "2020-02-14"
     print(f'Usuarios conectados al AP {ap} entre {date_start} y {date_end}:')
-    users = data.loc[data["MAC_AP"] == ap ]
-    users = users.loc[users["Inicio_de_Conexión_Dia"] > date_start]
-    users = users.loc[users["FIN_de_Conexión_Dia"] < date_end]["Usuario"].unique()
-    print(users)
+
+    users = data.loc[(data["MAC_AP"] == ap) & 
+                     (data["Inicio_de_Conexión_Dia"] > date_start) & 
+                     (data["FIN_de_Conexión_Dia"] < date_end)]["Usuario"].unique()
+    
+    # Crear una lista de listas para representar los datos en forma de tabla
+    tabla_data = [[user] for user in users]
+
+    # Obtener las etiquetas de las columnas
+    headers = ['Usuarios'] 
+
+    # Utilizar tabulate para mostrar los datos
+    tabla = tabulate.tabulate(tabla_data, headers, tablefmt='fancy_grid')
+    print(tabla)
 
 if __name__ == '__main__':
 
@@ -65,9 +86,8 @@ if __name__ == '__main__':
 
     # devuelve un DataFrame de las MACs de los APs
     ap_mac_list = data["MAC_AP"].unique()
-
+    
     # devuelve un DataFrame de los nombres de usuarios posibles
     user_list = data["Usuario"].unique()
 
     obtain()
-

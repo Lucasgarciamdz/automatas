@@ -1,6 +1,6 @@
 import unittest
 import re
-from main import date_regex, mac_regex, user_regex
+from automatas.TP5.backend.main import date_regex, mac_regex, user_regex
 
 class test_regex(unittest.TestCase):
     
