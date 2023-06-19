@@ -4,7 +4,7 @@ import time
 
 # Expresiones regulares
 MAC_RE = re.compile(r'([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2}):HCDD$')
-DATE_RE = re.compile(r'(20(1[0-9]|2[0-3])[-/](0[1-9]|1[0-2])[-/]([0-2][0-9]|3[0-1])$)')
+DATE_RE = re.compile(r'(20(1[5-9]|2[0-5])[-/](0[1-9]|1[0-2])[-/]([0-2][0-9]|3[0-1])$)')
 USER_RE = re.compile(r'([a-z]|[A-Z])*$')
 
 
@@ -27,8 +27,8 @@ def apply_regex(data: pd.DataFrame):
     return data
 
 
-def get_ap_list(data: pd.DataFrame):
-    return data["MAC_AP"].unique()
+# def get_ap_list(data: pd.DataFrame):
+#     return data["MAC_AP"].unique()
 
 
 if __name__ == '__main__':
