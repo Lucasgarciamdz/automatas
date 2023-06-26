@@ -1,7 +1,7 @@
 import typer
 import inquirer
 from yaspin import yaspin
-from csv_tool import create_pandas, apply_regex, DATE_RE
+from backend.csv_tool import create_pandas, apply_regex, DATE_RE
 from tabulate import tabulate
 
 
@@ -22,8 +22,8 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
     ap = inquirer.prompt([inquirer.List('ACCESS POINT', message="Seleccione un AP", choices=ap_list)])
 
     fechas = inquirer.prompt([
-        inquirer.Text("FECHA DE INICIO", message="Ingrese la fecha de inicio (YYYY/mm/dd)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
-        inquirer.Text("FECHA DE FIN", message="Ingrese la fecha de fin (YYYY/mm/dd)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
+        inquirer.Text("FECHA DE INICIO", message="Ingrese la fecha de inicio (YYYY/MM/DD)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
+        inquirer.Text("FECHA DE FIN", message="Ingrese la fecha de fin (YYYY/MM/DD)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
     ])
 
     fecha_i, fecha_f = fechas["FECHA DE INICIO"], fechas["FECHA DE FIN"]
