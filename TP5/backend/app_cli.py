@@ -1,8 +1,9 @@
 import typer
 import inquirer
 from yaspin import yaspin
-from backend.csv_tool import create_pandas, apply_regex, DATE_RE
+from csv_tool import create_pandas, apply_regex, DATE_RE
 from tabulate import tabulate
+import pandas as pd
 
 
 def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo csv")):
@@ -26,18 +27,31 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
         inquirer.Text("FECHA DE FIN", message="Ingrese la fecha de fin (YYYY/MM/DD)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
     ])
 
-    fecha_i, fecha_f = fechas["FECHA DE INICIO"], fechas["FECHA DE FIN"]
+    ap, fecha_i, fecha_f = ap["ACCESS POINT"], fechas["FECHA DE INICIO"], fechas["FECHA DE FIN"]
 
-    filtro = (data["MAC_AP"] == ap["ACCESS POINT"]) & (data["Inicio_de_Conexión_Dia"] >= fecha_i) & (data["Inicio_de_Conexión_Dia"] <= fecha_f)
+    fecha_i = pd.to_datetime(fecha_i)
+    fecha_f = pd.to_datetime(fecha_f)
+    data["Inicio_de_Conexión_Dia"] = pd.to_datetime(data["Inicio_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
+    data["FIN_de_Conexión_Dia"] = pd.to_datetime(data["FIN_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
+
+    filtro = (
+        (data["MAC_AP"] == ap)
+        & (data["Inicio_de_Conexión_Dia"].dt.year >= fecha_i.year)
+        & (data["Inicio_de_Conexión_Dia"].dt.month >= fecha_i.month)
+        & (data["Inicio_de_Conexión_Dia"].dt.day >= fecha_i.day)
+        & (data["FIN_de_Conexión_Dia"].dt.year <= fecha_f.year)
+        & (data["FIN_de_Conexión_Dia"].dt.month <= fecha_f.month)
+        & (data["FIN_de_Conexión_Dia"].dt.day <= fecha_f.day)
+    )
 
     data = data[filtro].groupby(["Usuario"]).count().reset_index()
     users = data["Usuario"].unique()
 
     print("")
-    print(tabulate([[user] for user in users], headers=[f"Usuarios conectados al AP {ap['ACCESS POINT']} entre {fecha_i} y {fecha_f}"], tablefmt='grid', stralign='center'))
+    print(tabulate([[user] for user in users], headers=[f"Usuarios conectados al AP {ap} entre {fecha_i} y {fecha_f}"], tablefmt='grid', stralign='center'))
 
     with open("output.csv", "w") as f:
-        f.write(data.to_csv(index=False))
+        f.write(data["Usuario"].to_csv(index=False))
 
 
 if __name__ == '__main__':

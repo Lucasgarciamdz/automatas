@@ -1,11 +1,10 @@
 import pandas as pd
 import re
-import time
 
 # Expresiones regulares
 MAC_RE = re.compile(r'([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2}):HCDD$')
 DATE_RE = re.compile(r'(20(1[5-9]|2[0-5])[-/](0[1-9]|1[0-2])[-/]([0-2][0-9]|3[0-1])$)')
-USER_RE = re.compile(r'([a-z]|[A-Z])*$')
+USER_RE = re.compile(r'[a-zA-Z0-9-_\\/]{1,25}$')
 
 
 def create_pandas(csv_path: str, columns: list = ["MAC_AP", "Inicio_de_Conexión_Dia", "FIN_de_Conexión_Dia", "Usuario"]):
