@@ -20,19 +20,39 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
 
     ap_list = data["MAC_AP"].unique().tolist()
 
-    ap = inquirer.prompt([inquirer.List('ACCESS POINT', message="Seleccione un AP", choices=ap_list)])
+    ap = inquirer.prompt(
+        [inquirer.List("ACCESS POINT", message="Seleccione un AP", choices=ap_list)]
+    )
 
-    fechas = inquirer.prompt([
-        inquirer.Text("FECHA DE INICIO", message="Ingrese la fecha de inicio (YYYY/MM/DD)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
-        inquirer.Text("FECHA DE FIN", message="Ingrese la fecha de fin (YYYY/MM/DD)", validate=lambda _, x: DATE_RE.fullmatch(x) is not None),
-    ])
+    fechas = inquirer.prompt(
+        [
+            inquirer.Text(
+                "FECHA DE INICIO",
+                message="Ingrese la fecha de inicio (YYYY/MM/DD)",
+                validate=lambda _, x: DATE_RE.fullmatch(x) is not None,
+            ),
+            inquirer.Text(
+                "FECHA DE FIN",
+                message="Ingrese la fecha de fin (YYYY/MM/DD)",
+                validate=lambda _, x: DATE_RE.fullmatch(x) is not None,
+            ),
+        ]
+    )
 
-    ap, fecha_i, fecha_f = ap["ACCESS POINT"], fechas["FECHA DE INICIO"], fechas["FECHA DE FIN"]
+    ap, fecha_i, fecha_f = (
+        ap["ACCESS POINT"],
+        fechas["FECHA DE INICIO"],
+        fechas["FECHA DE FIN"],
+    )
 
     fecha_i = pd.to_datetime(fecha_i)
     fecha_f = pd.to_datetime(fecha_f)
     data["Inicio_de_Conexión_Dia"] = pd.to_datetime(data["Inicio_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
     data["FIN_de_Conexión_Dia"] = pd.to_datetime(data["FIN_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
+
+    # filtro = (
+    #     (data["MAC_AP"] == ap) & (data["Inicio_de_Conexión_Dia"] >= fecha_i) & (data["FIN_de_Conexión_Dia"] <= fecha_f)
+    # )
 
     filtro = (
         (data["MAC_AP"] == ap)
@@ -48,11 +68,20 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
     users = data["Usuario"].unique()
 
     print("")
-    print(tabulate([[user] for user in users], headers=[f"Usuarios conectados al AP {ap} entre {fecha_i} y {fecha_f}"], tablefmt='grid', stralign='center'))
+    print(
+        tabulate(
+            [[user] for user in users],
+            headers=[
+                f'Usuarios conectados al AP {ap} entre {fechas["FECHA DE INICIO"]} y {fechas["FECHA DE FIN"]}'
+            ],
+            tablefmt="grid",
+            stralign="center",
+        )
+    )
 
     with open("output.csv", "w") as f:
         f.write(data["Usuario"].to_csv(index=False))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     typer.run(menu)
