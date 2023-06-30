@@ -50,21 +50,41 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
     data["Inicio_de_Conexión_Dia"] = pd.to_datetime(data["Inicio_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
     data["FIN_de_Conexión_Dia"] = pd.to_datetime(data["FIN_de_Conexión_Dia"])  # Convertir la columna a tipo datetime
 
-    # filtro = (
-    #     (data["MAC_AP"] == ap) & (data["Inicio_de_Conexión_Dia"] >= fecha_i) & (data["FIN_de_Conexión_Dia"] <= fecha_f)
-    # )
-
-    filtro = (
-        (data["MAC_AP"] == ap)
-        & (data["Inicio_de_Conexión_Dia"].dt.year >= fecha_i.year)
-        & (data["Inicio_de_Conexión_Dia"].dt.month >= fecha_i.month)
-        & (data["Inicio_de_Conexión_Dia"].dt.day >= fecha_i.day)
-        & (data["FIN_de_Conexión_Dia"].dt.year <= fecha_f.year)
-        & (data["FIN_de_Conexión_Dia"].dt.month <= fecha_f.month)
+    entre_fechas = \
+        (data["Inicio_de_Conexión_Dia"].dt.year >= fecha_i.year)\
+        & (data["Inicio_de_Conexión_Dia"].dt.month >= fecha_i.month)\
+        & (data["Inicio_de_Conexión_Dia"].dt.day >= fecha_i.day)\
+        & (data["FIN_de_Conexión_Dia"].dt.year <= fecha_f.year)\
+        & (data["FIN_de_Conexión_Dia"].dt.month <= fecha_f.month)\
+        & (data["FIN_de_Conexión_Dia"].dt.day <= fecha_f.day)    
+    
+    anterior_fecha_i = \
+        (data["FIN_de_Conexión_Dia"].dt.year >= fecha_i.year)\
+        & (data["FIN_de_Conexión_Dia"].dt.month >= fecha_i.month)\
+        & (data["FIN_de_Conexión_Dia"].dt.day >= fecha_i.day)\
+        & (data["FIN_de_Conexión_Dia"].dt.year <= fecha_f.year)\
+        & (data["FIN_de_Conexión_Dia"].dt.month <= fecha_f.month)\
         & (data["FIN_de_Conexión_Dia"].dt.day <= fecha_f.day)
-    )
+    
+    despues_fecha_f = \
+        (data["Inicio_de_Conexión_Dia"].dt.year >= fecha_i.year)\
+        & (data["Inicio_de_Conexión_Dia"].dt.month >= fecha_i.month)\
+        & (data["Inicio_de_Conexión_Dia"].dt.day >= fecha_i.day)\
+        & (data["Inicio_de_Conexión_Dia"].dt.year <= fecha_f.year)\
+        & (data["Inicio_de_Conexión_Dia"].dt.month <= fecha_f.month)\
+        & (data["Inicio_de_Conexión_Dia"].dt.day <= fecha_f.day)
+    
+    fuera_fechas = \
+        (data["Inicio_de_Conexión_Dia"].dt.year <= fecha_i.year)\
+        & (data["Inicio_de_Conexión_Dia"].dt.month <= fecha_i.month)\
+        & (data["Inicio_de_Conexión_Dia"].dt.day <= fecha_i.day)\
+        & (data["FIN_de_Conexión_Dia"].dt.year >= fecha_f.year)\
+        & (data["FIN_de_Conexión_Dia"].dt.month >= fecha_f.month)\
+        & (data["FIN_de_Conexión_Dia"].dt.day >= fecha_f.day)
+    
+    filtro = ((data["MAC_AP"] == ap) & ((entre_fechas) | (anterior_fecha_i) | (despues_fecha_f) | (fuera_fechas)))
 
-    data = data[filtro].groupby(["Usuario"]).count().reset_index()
+    data = data[filtro]
     users = data["Usuario"].unique()
 
     print("")
@@ -72,15 +92,15 @@ def menu(csv_path: str = typer.Option(..., prompt="Ingrese la ruta del archivo c
         tabulate(
             [[user] for user in users],
             headers=[
-                f'Usuarios conectados al AP {ap} entre {fechas["FECHA DE INICIO"]} y {fechas["FECHA DE FIN"]}'
+                f'Usuarios conectados al AP {ap} entre {fecha_i} y {fecha_f}'
             ],
             tablefmt="grid",
             stralign="center",
         )
     )
 
-    with open("output.csv", "w") as f:
-        f.write(data["Usuario"].to_csv(index=False))
+    with open("output.csv", "w+") as f:
+        f.write(data.to_csv(index=False))
 
 
 if __name__ == "__main__":
