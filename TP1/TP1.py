@@ -1,6 +1,5 @@
-import re
 
-def ejercicio3(cadena="123"):
+def ejercicio3(string):
 
     tabla = [[2, 1, 1, "", "", ""],
              [2, "", "", "", "", ""],
@@ -11,10 +10,10 @@ def ejercicio3(cadena="123"):
              [7, "", "", "", "", ""],
              [7, "", "", "", "", 8]]
 
-    estado = 0 #123
+    estado = 0
     digitos = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-    for caracter in cadena:
+    for caracter in string:
 
         if caracter == "+" and (estado == 0 or estado == 5):
             estado = tabla[estado][1]
