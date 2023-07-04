@@ -16,10 +16,10 @@ def create_pandas(csv_path: str, columns: list = ["MAC_AP", "Inicio_de_Conexión
 
 def apply_regex(data: pd.DataFrame) -> pd.DataFrame:
     filtro = (
-        data["MAC_AP"].str.match(MAC_RE)
-        & data["Inicio_de_Conexión_Dia"].str.match(DATE_RE)
-        & data["FIN_de_Conexión_Dia"].str.match(DATE_RE)
-        & data["Usuario"].str.match(USER_RE)
+        data["MAC_AP"].apply(lambda x: bool(re.fullmatch(MAC_RE, str(x))))
+        & data["Inicio_de_Conexión_Dia"].apply(lambda x: bool(re.fullmatch(DATE_RE, str(x))))
+        & data["FIN_de_Conexión_Dia"].apply(lambda x: bool(re.fullmatch(DATE_RE, str(x))))
+        & data["Usuario"].apply(lambda x: bool(re.fullmatch(USER_RE, str(x))))
     )
     data = data[filtro]
 
